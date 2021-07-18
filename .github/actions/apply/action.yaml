@@ -1,0 +1,10 @@
+name: apply
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        echo "Running terraform apply in ${GITHUB_WORKSPACE}/${TF_COMPONENT}/terraform"
+        cd ${TF_COMPONENT}/terraform
+        terraform init -input=false -backend-config=${GITHUB_WORKSPACE}/${TF_COMPONENT}/environments/${ENV}/${REGION}/backend.tfvars
+        terraform apply -input=false terraform-plans/${TF_COMPONENT}.plan
+      shell: sh

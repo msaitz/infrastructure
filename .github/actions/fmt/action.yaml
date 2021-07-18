@@ -1,0 +1,9 @@
+name: fmt
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        echo "Running terraform fmt in ${GITHUB_WORKSPACE}/${TF_COMPONENT}/terraform"
+        cd ${TF_COMPONENT}
+        terraform fmt -check -diff -recursive
+      shell: sh

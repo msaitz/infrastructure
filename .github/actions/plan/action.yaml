@@ -1,0 +1,11 @@
+name: plan
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        echo "Running terraform plan in ${GITHUB_WORKSPACE}/${TF_COMPONENT}/terraform"
+        cd ${TF_COMPONENT}/terraform
+        mkdir -p terraform-plans
+        terraform init -input=false -backend-config=${GITHUB_WORKSPACE}/${TF_COMPONENT}/environments/${ENV}/${REGION}/backend.tfvars
+        terraform plan -input=false -var-file=${GITHUB_WORKSPACE}/${TF_COMPONENT}/environments/${ENV}/${REGION}/terraform.tfvars -out=terraform-plans/${TF_COMPONENT}.plan
+      shell: sh

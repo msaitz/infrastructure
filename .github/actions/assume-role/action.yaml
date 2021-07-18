@@ -1,0 +1,19 @@
+name: Assume role
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        if [ "${ENV}" = "dev" ]; then
+          AWS_ACCOUNT=106874539094
+        elif [ "${ENV}" = "prod" ]; then
+          AWS_ACCOUNT=501067849114
+        else
+          echo "${ENV} is an unknown AWS environment!" && exit 1
+        fi
+
+        AWS_DEFAULT_REGION=${REGION} aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${AWS_ACCOUNT}:role/OrganizationAccountAccessRole --role-session-name "terraform-session")
+
+        export AWS_ACCESS_KEY_ID=$(echo $aws_credentials | jq '.Credentials.AccessKeyId' | tr -d '"')
+        export AWS_SECRET_ACCESS_KEY=$(echo $aws_credentials | jq '.Credentials.SecretAccessKey' | tr -d '"')
+        export AWS_SESSION_TOKEN=$(echo $aws_credentials | jq '.Credentials.SessionToken' | tr -d '"')
+      shell: sh

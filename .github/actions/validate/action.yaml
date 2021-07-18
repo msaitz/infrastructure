@@ -1,0 +1,10 @@
+name: validate
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        echo "Running terraform validate in ${GITHUB_WORKSPACE}/${TF_COMPONENT}/terraform"
+        cd ${TF_COMPONENT}/terraform
+        terraform init -input=false -backend-config=${GITHUB_WORKSPACE}/${TF_COMPONENT}/environments/${ENV}/${REGION}/backend.tfvars
+        terraform validate
+      shell: sh
