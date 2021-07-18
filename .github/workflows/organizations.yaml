@@ -10,9 +10,9 @@ defaults:
 on: 
   push:
     paths:
-      - 'organization/**'
-      - '!organization/README.md'
-      - '.github/workflows/.yaml'
+      - 'organizations/**'
+      - '!organizations/README.md'
+      - '.github/workflows/organizations.yaml'
       - '.github/actions/**'
 
 jobs:
@@ -56,11 +56,8 @@ jobs:
           path: plan-outputs/plan.out
   apply:
     needs: plan
-      - name: Download plan
-        uses: actions/download-artifact@v2
-        with:
-          name: dev-plan-file
-          path: plan-outputs
+    environment:
+      name: prod
     runs-on: ubuntu-latest
     container:
       image: hashicorp/terraform:1.0.2
