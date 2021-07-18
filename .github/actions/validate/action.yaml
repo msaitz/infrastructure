@@ -1,0 +1,20 @@
+name: validate
+inputs:
+  tf_component:
+    description: 'terraform component directory name'
+    required: true
+  env:
+    description: 'AWS environment'
+    required: true
+  region:
+    description: 'AWS region'
+    default: 'eu-west-1'
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        echo "Running terraform validate in ${{ inputs.tf_component }}/terraform"
+        echo "cd ${{ inputs.tf_component }}/terraform"
+        echo "terraform init -input=false -backend-config=${{ inputs.tf_component }}/environments/${{ inputs.env }}/${{ inputs.region }}/file.tfvars"
+        echo "terraform validate"
+      shell: sh
