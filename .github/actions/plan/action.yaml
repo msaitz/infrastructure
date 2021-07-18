@@ -1,21 +1,11 @@
 name: plan
-inputs:
-  tf_component:
-    description: 'terraform component directory name'
-    required: true
-  env:
-    description: 'AWS environment'
-    required: true
-  region:
-    description: 'AWS region'
-    default: 'eu-west-1'
 runs:
   using: "composite"
   steps:
     - run: |
-        echo "Running terraform plan in ${{ inputs.tf_component }}/terraform"
-        echo "cd ${{ inputs.tf_component }}/terraform"
-        echo "mkdir -p terraform-plans"
-        echo "terraform init -input=false -backend-config=${{ inputs.tf_component }}/environments/${{ inputs.env }}/${{ inputs.region }}/file.tfvars"
-        echo "terraform plan -input=false -out=terraform-plans/${{ inputs.tf_component }}.plan -var-file=${{ inputs.tf_component }}/environments/${{ inputs.env }}/${{ inputs.region }}/file.tfvars"
+        echo "Running terraform plan in ${GITHUB_WORKSPACE}/${TF_COMPONENT}/terraform"
+        cd ${TF_COMPONENT}/terraform
+        mkdir -p terraform-plans
+        terraform init -input=false -backend-config=${GITHUB_WORKSPACE}/${TF_COMPONENT}/environments/${ENV}/${REGION}/backend.tfvars
+        terraform plan -input=false -var-file=${GITHUB_WORKSPACE}/${TF_COMPONENT}/environments/${ENV}/${REGION}/terraform.tfvars -out=terraform-plans/${TF_COMPONENT}.plan
       shell: sh

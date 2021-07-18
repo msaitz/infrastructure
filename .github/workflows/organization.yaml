@@ -1,0 +1,84 @@
+name: organization
+
+env:
+  TF_COMPONENT: 'organization'
+  REGION: 'global'
+  ENV: 'msaitz'
+
+on: 
+  pull_request:
+    paths:
+      - 'organization/**'
+      - '.github/workflows/organization.yaml'
+      - '.github/actions/**'
+      - '!organization/README.md'
+  push:
+    branches:
+      - master
+    paths:
+      - 'organization/**'
+      - '.github/workflows/organization.yaml'
+      - '.github/actions/**'
+      - '!organization/README.md'
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/msaitz/terraform:1.0.2
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Check format of terraform code
+        uses: ./.github/actions/fmt
+  validate:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/msaitz/terraform:1.0.2
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Check validity of terraform code with dev config
+        uses: ./.github/actions/validate
+  plan:
+    needs: [fmt, validate]
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/msaitz/terraform:1.0.2
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Run terraform plan
+        uses: ./.github/actions/plan
+      - name: Upload output file
+        uses: actions/upload-artifact@v2
+        with:
+          name: plan-file-msaitz
+          path: ${{ github.workspace }}/${{ env.TF_COMPONENT }}/terraform/terraform-plans/
+  apply:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: plan
+    environment:
+      name: msaitz
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/msaitz/terraform:1.0.2
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Download plan
+        uses: actions/download-artifact@v2
+        with:
+          name: plan-file-msaitz
+          path: ${{ github.workspace }}/${{ env.TF_COMPONENT }}/terraform/terraform-plans/
+      - name: Run terraform plan
+        uses: ./.github/actions/apply

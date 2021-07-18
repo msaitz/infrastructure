@@ -1,13 +1,9 @@
 name: fmt
-inputs:
-  tf_component:
-    description: 'Terraform component directory name'
-    required: true
 runs:
   using: "composite"
   steps:
     - run: |
-        echo "Running terraform fmt in ${{ inputs.tf_component }}/terraform"
-        echo "cd ${{ inputs.tf_component }}"
-        echo "terraform fmt -check -diff -recursive"
+        echo "Running terraform fmt in ${GITHUB_WORKSPACE}/${TF_COMPONENT}/terraform"
+        cd ${TF_COMPONENT}
+        terraform fmt -check -diff -recursive
       shell: sh
